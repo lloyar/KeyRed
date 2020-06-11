@@ -3,9 +3,10 @@
 
 static PyObject *py_simplify_curve(PyObject *self, PyObject *args) {
     PyObject *pyPointList;
+    double error;
     int len;
 
-    if (!PyArg_ParseTuple(args, "O", &pyPointList)) {
+    if (!PyArg_ParseTuple(args, "Od", &pyPointList, &error)) {
         return NULL;
     }
 
@@ -23,7 +24,7 @@ static PyObject *py_simplify_curve(PyObject *self, PyObject *args) {
         pointArray[i].v = PyFloat_AsDouble(pyFloatV);
     }
 
-    struct KeyFrameNode *firstNode = simplify_curve(&pointArray[0], len);
+    struct KeyFrameNode *firstNode = simplify_curve(&pointArray[0], len, error);
 
     PyObject *pyList = PyList_New(0);
     struct KeyFrameNode *p = NULL;

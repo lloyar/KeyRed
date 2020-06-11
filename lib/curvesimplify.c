@@ -8,17 +8,14 @@
 #include <math.h>
 #include "curvesimplify.h"
 
-#define ERROR 0.02
-
 struct KeyFrameList {
-    struct KeyFrameNode *firstKey;
-    struct KeyFrameNode *finalKey;
+    struct KeyFrameNode *first;
 
     struct KeyFrameNode *start;
     struct KeyFrameNode *end;
 };
 
-struct KeyFrameList frameList = {NULL, NULL, NULL, NULL};
+struct KeyFrameList frameList = {NULL, NULL, NULL};
 
 void add_node_to_list(KeyFrame *key) {
     struct KeyFrameNode *newKey = malloc(sizeof(struct KeyFrameNode));
@@ -97,14 +94,14 @@ double evaluate_internal(double curTime, const KeyFrame *leftKey, const KeyFrame
     return v;
 }
 
-bool evaluate_error(const KeyFrame *curve) {
+bool evaluate_error(const KeyFrame *curve, double error) {
     KeyFrame *s = frameList.start->key;
     KeyFrame *e = frameList.end->key;
 
     for (int i = s->index + 1; i < e->index; ++i) {
         double v = evaluate_internal(curve[i].time, s, e);
-        double error = fabs(v - curve[i].value);
-        if (error > ERROR) {
+        double cur_error = fabs(v - curve[i].value);
+        if (cur_error > error) {
             return false;
         }
     }
@@ -112,7 +109,7 @@ bool evaluate_error(const KeyFrame *curve) {
     return true;
 }
 
-struct KeyFrameNode *simplify_curve(Point *points, int n) {
+struct KeyFrameNode *simplify_curve(Point *points, int n, double error) {
     KeyFrame *curve = malloc(n * sizeof(KeyFrame));
 
     for (int i = 0; i < n; ++i) {
@@ -128,34 +125,39 @@ struct KeyFrameNode *simplify_curve(Point *points, int n) {
     firstNode->key = &curve[0];
     firstNode->prev = NULL;
     firstNode->next = NULL;
-    frameList.start = frameList.firstKey = firstNode;
+    frameList.start = frameList.first = firstNode;
 
     curve[n - 1].leftTangent = get_tangent(curve[n - 2], curve[n - 1]);
     struct KeyFrameNode *finalNode = malloc(sizeof(struct KeyFrameNode));
     finalNode->key = &curve[n - 1];
     finalNode->prev = NULL;
     finalNode->next = NULL;
-    frameList.end = frameList.finalKey = finalNode;
+    frameList.end = finalNode;
 
-    bool accord_error = false;
-    while (!accord_error) {
-        KeyFrame *errorKey = get_max_error_index(&curve[0]);
-        add_node_to_list(errorKey);
-        accord_error = evaluate_error(curve);
-    }
+    frameList.start->next = frameList.end;
+    frameList.end->prev = frameList.start;
 
-    accord_error = false;
-    while (frameList.end->next != NULL) {
+    while (true) {
+        bool accord_error = false;
+        accord_error = evaluate_error(&curve[0], error);
+        if (!accord_error) {
+            while (!accord_error) {
+                KeyFrame *errorKey = get_max_error_index(&curve[0]);
+                add_node_to_list(errorKey);
+                accord_error = evaluate_error(&curve[0], error);
+            }
+        }
+
         frameList.start = frameList.start->next;
         frameList.end = frameList.end->next;
 
-        while (!accord_error) {
-            KeyFrame *errorKey = get_max_error_index(&curve[0]);
-            add_node_to_list(errorKey);
-
-            accord_error = evaluate_error(curve);
+        if (frameList.end->next == NULL) {
+            accord_error = evaluate_error(&curve[0], error);
+            if (accord_error) {
+                break;
+            }
         }
     }
 
-    return frameList.firstKey;
+    return frameList.first;
 }
