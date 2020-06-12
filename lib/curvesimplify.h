@@ -21,6 +21,6 @@ struct KeyFrameNode {
     struct KeyFrameNode *next;
 };
 
-extern struct KeyFrameNode *simplify_curve(Point *points, int n);
+extern struct KeyFrameNode *simplify_curve(Point *points, int n, double error);
 
 #endif //CURVESIMPLIFY_H
