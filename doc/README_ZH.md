@@ -7,7 +7,7 @@ Keyframe Reduction 是一个用 C 写的 Python 库。该库的主要功能是�
 主要的应用场景是动画数据的精简处理，具体的拟合效果可查看tests目录下的 [test_plot.ipynb](/test_plot.ipynb)。 
 经过精简的动画数据，体积可减小70%～90%，具体的压缩比率与动画数据的波动频率相关。
 
-![plot](Screen Shot 2020-06-12 at 10.19.49.png)
+![plot](./ScreenShot1.png)
 
 ## Installation 
 
