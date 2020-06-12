@@ -1,6 +1,6 @@
 # KeyRed
 
-Language: [English](README.md) | [中文](doc/README_ZH.md)
+Language: [English](README.md) | [中文](README_ZH.md)
 -------
 
 Keyframe reduction is a python library written in C. The main function of the database is to obtain a small number of control points and to fit complex curves.

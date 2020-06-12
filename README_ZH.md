@@ -1,6 +1,6 @@
 # KeyRed
 
-语言: [English](../README.md) | [中文](README_ZH.md)
+语言: [English](README.md) | [中文](README_ZH.md)
 ------------
 
 ## 简介
